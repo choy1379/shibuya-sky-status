@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>시부야 스카이 빈자리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+  /* 레이아웃: 한 줄 세로 흐름 — 상태 → (원하는 날짜 강조) → 날짜별 빈자리 → 예매 링크 */
+  :root {
+    --bg: #eef1f6;          /* 해 질 녘 전 옅은 하늘 */
+    --surface: #ffffff;
+    --ink: #1b2236;         /* 밤하늘 남색 */
+    --muted: #5d6680;
+    --line: #d7dce7;
+    --accent: #3d4fd1;      /* 도시 야경 블루 */
+    --on-accent: #ffffff;
+    --sun: #f4b23e;         /* 노을 노랑 — 원하는 날짜 강조 */
+    --sun-ink: #2b1d00;
+    --ok: #1f8a4c;  --ok-bg: #e2f4ea;
+    --low: #a35a00; --low-bg: #fcefd9;
+    --bad: #c23a3a; --bad-bg: #fbe4e4;
+    --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1424; --surface: #181f33; --ink: #e8ebf4; --muted: #9aa3bd; --line: #2a3350;
+      --accent: #8c9bff; --on-accent: #0f1424; --sun: #f4b23e; --sun-ink: #2b1d00;
+      --ok: #5fd08f; --ok-bg: #173527; --low: #f2b45a; --low-bg: #3a2a12; --bad: #f08080; --bad-bg: #3d1c1f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1424; --surface: #181f33; --ink: #e8ebf4; --muted: #9aa3bd; --line: #2a3350;
+    --accent: #8c9bff; --on-accent: #0f1424; --sun: #f4b23e; --sun-ink: #2b1d00;
+    --ok: #5fd08f; --ok-bg: #173527; --low: #f2b45a; --low-bg: #3a2a12; --bad: #f08080; --bad-bg: #3d1c1f;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 15px/1.6 var(--font-body);
+    padding: 0 16px;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  main { max-width: 640px; margin: 0 auto; padding-block: 32px 48px; display: grid; gap: 20px; }
+  h1 { font-size: 1.6rem; line-height: 1.25; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+  h1 small { display: block; font-size: 0.95rem; font-weight: 400; color: var(--muted); margin-top: 4px; }
+  .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  .status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; color: var(--muted); font-size: 0.9rem; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: 0.85rem; }
+  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .pill.ok { color: var(--ok); background: var(--ok-bg); }
+  .pill.bad { color: var(--bad); background: var(--bad-bg); }
+  .pill.idle { color: var(--muted); background: var(--surface); border: 1px solid var(--line); }
+  .pill.ok::before { animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+  @media (prefers-reduced-motion: reduce) { .pill.ok::before { animation: none; } }
+
+  .notice { padding: 12px 14px; border-radius: 10px; background: var(--bad-bg); color: var(--bad); font-size: 0.9rem; }
+
+  .wish { background: var(--sun); color: var(--sun-ink); border-radius: 14px; padding: 16px 18px; display: grid; gap: 8px; }
+  .wish h2 { margin: 0; font-size: 1.15rem; }
+  .wish ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+  .wish li { font-weight: 600; }
+
+  .day { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .day.wished { border-color: var(--sun); box-shadow: 0 0 0 2px var(--sun); }
+  .day header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .day header h3 { margin: 0; font-size: 1.05rem; }
+  .day header span { color: var(--muted); font-size: 0.85rem; }
+  .slot { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 12px; padding: 10px 16px; }
+  .slot + .slot { border-top: 1px solid var(--line); }
+  .slot .time { font-size: 1rem; }
+  .slot .since { color: var(--muted); font-size: 0.82rem; text-align: right; }
+  .tag { font-size: 0.8rem; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+  .tag.ok { color: var(--ok); background: var(--ok-bg); }
+  .tag.low { color: var(--low); background: var(--low-bg); }
+
+  .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; padding: 28px 20px; text-align: center; color: var(--muted); }
+  .empty strong { display: block; color: var(--ink); font-size: 1.05rem; margin-bottom: 4px; }
+
+  .cta { display: block; text-align: center; padding: 14px; border-radius: 12px; background: var(--accent); color: var(--on-accent); font-weight: 700; text-decoration: none; }
+  .cta:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+
+  footer { color: var(--muted); font-size: 0.82rem; display: grid; gap: 4px; }
+  footer p { margin: 0; max-width: 65ch; }
+</style>
+</head>
+<body>
+<main>
+  <h1>시부야 스카이 빈자리<small id="subtitle">18:00 이후 입장권 · 공식 사이트(Webket) 기준</small></h1>
+
+  <div class="status" id="status"><span class="pill idle">불러오는 중</span></div>
+  <div id="notice"></div>
+  <div id="wish"></div>
+  <div id="list" style="display:grid;gap:12px"></div>
+
+  <a class="cta" id="cta" href="https://webket.jp/pc/ticket/itemdetail?fc=00396&ac=8001&igc=0030&lang=4" target="_blank" rel="noopener">Webket에서 예매하기</a>
+
+  <footer>
+    <p>○ 여유 · △ 잔여 적음. 한 대의 PC가 몇 분마다 확인한 결과라 실제 사이트와 몇 분 차이가 날 수 있어요.</p>
+    <p>이 페이지는 1분마다 자동으로 새로 불러옵니다. 예매는 Webket에서 직접 해야 합니다.</p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  const DATA_BRANCH = 'data';
+  const STALE_MIN = 30;           // 이 시간 넘게 갱신이 없으면 감시가 멈춘 것으로 표시
+  const params = new URLSearchParams(location.search);
+  const DOW = '일월화수목금토';
+  let data = null;
+
+  function dataUrl() {
+    const m = location.hostname.match(/^([^.]+)\.github\.io$/i);
+    const repo = location.pathname.split('/').filter(Boolean)[0];
+    if (m && repo) return `https://raw.githubusercontent.com/${m[1]}/${repo}/${DATA_BRANCH}/status.json?t=${Date.now()}`;
+    return `status.json?t=${Date.now()}`;
+  }
+
+  // ?demo 로 열면 예시 데이터로 화면을 보여줌
+  function demoData() {
+    const ago = m => new Date(Date.now() - m * 60000).toISOString();
+    return {
+      checkedAt: ago(2), state: 'ok', message: '', minTime: '18:00', intervalSec: 300,
+      highlightDates: ['2026-10-09', '2026-10-10', '2026-10-11'],
+      url: 'https://webket.jp/pc/ticket/itemdetail?fc=00396&ac=8001&igc=0030&lang=4',
+      slots: [
+        { date: '2026-10-07', start: '18:40', end: '18:59', status: 'low', since: ago(41) },
+        { date: '2026-10-10', start: '19:00', end: '19:19', status: 'ok',  since: ago(3) },
+        { date: '2026-10-16', start: '20:00', end: '20:19', status: 'low', since: ago(95) },
+        { date: '2026-10-16', start: '21:00', end: '21:20', status: 'ok',  since: ago(12) }
+      ]
+    };
+  }
+
+  const el = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function dayLabel(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return `${m}월 ${d}일 (${DOW[new Date(y, m - 1, d).getDay()]})`;
+  }
+  function shortDay(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return `${m}/${d}(${DOW[new Date(y, m - 1, d).getDay()]})`;
+  }
+  function ago(iso) {
+    const min = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
+    if (min < 1) return '방금';
+    if (min < 60) return `${min}분 전`;
+    const h = Math.floor(min / 60);
+    return h < 24 ? `${h}시간 ${min % 60}분 전` : `${Math.floor(h / 24)}일 전`;
+  }
+  function clock(iso) {
+    return new Date(iso).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  const tag = s => s === 'ok' ? '<span class="tag ok">○ 여유</span>' : '<span class="tag low">△ 잔여 적음</span>';
+
+  function render() {
+    if (!data) return;
+    const stale = (Date.now() - new Date(data.checkedAt)) / 60000 > STALE_MIN;
+    const minTime = data.minTime || '18:00';
+    el('subtitle').textContent = `${minTime} 이후 입장권 · 공식 사이트(Webket) 기준`;
+    if (data.url) el('cta').href = data.url;
+
+    // 상태줄
+    let pill;
+    if (stale) pill = '<span class="pill idle">감시가 멈춘 것 같아요</span>';
+    else if (data.state === 'blocked') pill = '<span class="pill bad">사이트 접속 차단됨</span>';
+    else if (data.state === 'captcha') pill = '<span class="pill bad">사람 확인 대기 중</span>';
+    else if (data.state === 'error') pill = '<span class="pill bad">확인 실패</span>';
+    else pill = '<span class="pill ok">감시 중</span>';
+    const every = data.intervalSec ? ` · ${Math.round(data.intervalSec / 60)}분마다 확인` : '';
+    el('status').innerHTML = `${pill}<span>마지막 갱신 <span class="mono">${clock(data.checkedAt)}</span> (${ago(data.checkedAt)})${every}</span>`;
+
+    // 안내문
+    let notice = '';
+    if (stale) notice = `${STALE_MIN}분 넘게 갱신이 없어요. 감시하는 PC가 꺼졌거나 프로그램이 멈췄을 수 있습니다. 아래 목록은 마지막으로 확인한 내용이에요.`;
+    else if (data.state === 'blocked') notice = 'Webket이 접속을 잠시 막았어요. 감시 프로그램이 30분 뒤 다시 시도합니다.';
+    else if (data.state === 'captcha') notice = 'Webket이 사람 확인(CAPTCHA)을 요청해서 감시가 잠시 멈췄어요. 감시하는 사람이 풀면 바로 이어집니다.';
+    else if (data.state === 'error') notice = `지금 상태를 확인하지 못했어요. ${data.message || ''}`;
+    el('notice').innerHTML = notice ? `<div class="notice">${esc(notice)}</div>` : '';
+
+    const slots = (data.slots || []).slice().sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+    const wished = new Set(data.highlightDates || []);
+
+    // 원하는 날짜 강조
+    const hits = slots.filter(s => wished.has(s.date));
+    if (hits.length && data.state === 'ok') {
+      const range = [...wished].sort().map(shortDay).join(', ');
+      el('wish').innerHTML = `<section class="wish" aria-live="polite">
+        <h2>원하는 날짜에 자리 있어요 · ${hits.length}건</h2>
+        <ul>${hits.map(s => `<li><span class="mono">${esc(shortDay(s.date))} ${esc(s.start)}–${esc(s.end)}</span> ${s.status === 'ok' ? '○' : '△'}</li>`).join('')}</ul>
+        <div style="font-size:.85rem">찾는 날짜: ${esc(range)}</div>
+      </section>`;
+    } else {
+      el('wish').innerHTML = '';
+    }
+
+    // 날짜별 목록
+    if (!slots.length) {
+      el('list').innerHTML = data.state === 'ok'
+        ? `<div class="empty"><strong>지금은 ${esc(minTime)} 이후 빈자리가 없어요</strong>취소표가 나오면 이 페이지에 바로 표시됩니다.</div>`
+        : '';
+      return;
+    }
+    const byDate = {};
+    slots.forEach(s => (byDate[s.date] = byDate[s.date] || []).push(s));
+    el('list').innerHTML = Object.keys(byDate).map(d => `
+      <section class="day${wished.has(d) ? ' wished' : ''}">
+        <header><h3>${esc(dayLabel(d))}</h3><span>${byDate[d].length}개 시간대</span></header>
+        ${byDate[d].map(s => `
+          <div class="slot">
+            <span class="time mono">${esc(s.start)}–${esc(s.end)}</span>
+            ${tag(s.status)}
+            <span class="since">${s.since ? esc(ago(s.since)) + '부터' : ''}</span>
+          </div>`).join('')}
+      </section>`).join('');
+  }
+
+  async function load() {
+    if (params.has('demo')) { data = demoData(); render(); return; }
+    try {
+      const r = await fetch(dataUrl(), { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      data = await r.json();
+    } catch (e) {
+      if (!data) {
+        el('status').innerHTML = '<span class="pill idle">아직 데이터가 없어요</span>';
+        el('notice').innerHTML = '<div class="notice">감시 프로그램이 첫 결과를 올리면 여기에 표시됩니다.</div>';
+      }
+    }
+    render();
+  }
+
+  load();
+  setInterval(load, 60000);
+  setInterval(render, 30000);
+})();
+</script>
+</body>
+</html>
