@@ -97,7 +97,7 @@
 </head>
 <body>
 <main>
-  <h1>시부야 스카이 빈자리<small id="subtitle">18:00 이후 입장권 · Klook 기준</small></h1>
+  <h1>시부야 스카이 빈자리<small id="subtitle">16:00 이후 입장권 · Klook 기준</small></h1>
 
   <div class="status" id="status"><span class="pill idle">불러오는 중</span></div>
   <div id="notice"></div>
@@ -132,7 +132,7 @@
   function demoData() {
     const ago = m => new Date(Date.now() - m * 60000).toISOString();
     return {
-      checkedAt: ago(2), state: 'ok', message: '', minTime: '18:00', intervalSec: 300,
+      checkedAt: ago(2), state: 'ok', message: '', minTime: '16:00', intervalSec: 300,
       highlightDates: ['2026-10-09', '2026-10-10', '2026-10-11'],
       url: 'https://www.klook.com/ko/activity/70672-shibuya-sky-tokyo/',
       slots: [
@@ -170,7 +170,7 @@
   function render() {
     if (!data) return;
     const stale = (Date.now() - new Date(data.checkedAt)) / 60000 > STALE_MIN;
-    const minTime = data.minTime || '18:00';
+    const minTime = data.minTime || '16:00';
     el('subtitle').textContent = `${minTime} 이후 입장권 · Klook 기준`;
     if (data.url) el('cta').href = data.url;
 
