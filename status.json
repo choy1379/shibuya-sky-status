@@ -1,15 +1,9 @@
 {
-    "checkedAt":  "2026-10-03T14:19:30Z",
+    "checkedAt":  "2026-10-03T14:21:46Z",
     "state":  "ok",
     "minTime":  "18:00",
     "slots":  [
-                  {
-                      "date":  "2026-10-10",
-                      "start":  "21:00",
-                      "end":  "21:20",
-                      "status":  "low",
-                      "since":  "2026-10-03T14:04:23Z"
-                  }
+
               ],
     "highlightDates":  [
                            "2026-10-09",
