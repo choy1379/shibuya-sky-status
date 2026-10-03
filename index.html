@@ -97,18 +97,18 @@
 </head>
 <body>
 <main>
-  <h1>시부야 스카이 빈자리<small id="subtitle">18:00 이후 입장권 · 공식 사이트(Webket) 기준</small></h1>
+  <h1>시부야 스카이 빈자리<small id="subtitle">16:00 이후 입장권 · Klook 기준</small></h1>
 
   <div class="status" id="status"><span class="pill idle">불러오는 중</span></div>
   <div id="notice"></div>
   <div id="wish"></div>
   <div id="list" style="display:grid;gap:12px"></div>
 
-  <a class="cta" id="cta" href="https://webket.jp/pc/ticket/itemdetail?fc=00396&ac=8001&igc=0030&lang=4" target="_blank" rel="noopener">Webket에서 예매하기</a>
+  <a class="cta" id="cta" href="https://www.klook.com/ko/activity/70672-shibuya-sky-tokyo/" target="_blank" rel="noopener">Klook에서 예매하기</a>
 
   <footer>
     <p>○ 여유 · △ 잔여 적음. 한 대의 PC가 몇 분마다 확인한 결과라 실제 사이트와 몇 분 차이가 날 수 있어요.</p>
-    <p>이 페이지는 1분마다 자동으로 새로 불러옵니다. 예매는 Webket에서 직접 해야 합니다.</p>
+    <p>이 페이지는 1분마다 자동으로 새로 불러옵니다. 예매는 Klook에서 직접 해야 합니다.</p>
   </footer>
 </main>
 
@@ -132,9 +132,9 @@
   function demoData() {
     const ago = m => new Date(Date.now() - m * 60000).toISOString();
     return {
-      checkedAt: ago(2), state: 'ok', message: '', minTime: '18:00', intervalSec: 300,
+      checkedAt: ago(2), state: 'ok', message: '', minTime: '16:00', intervalSec: 300,
       highlightDates: ['2026-10-09', '2026-10-10', '2026-10-11'],
-      url: 'https://webket.jp/pc/ticket/itemdetail?fc=00396&ac=8001&igc=0030&lang=4',
+      url: 'https://www.klook.com/ko/activity/70672-shibuya-sky-tokyo/',
       slots: [
         { date: '2026-10-07', start: '18:40', end: '18:59', status: 'low', since: ago(41) },
         { date: '2026-10-10', start: '19:00', end: '19:19', status: 'ok',  since: ago(3) },
@@ -170,8 +170,8 @@
   function render() {
     if (!data) return;
     const stale = (Date.now() - new Date(data.checkedAt)) / 60000 > STALE_MIN;
-    const minTime = data.minTime || '18:00';
-    el('subtitle').textContent = `${minTime} 이후 입장권 · 공식 사이트(Webket) 기준`;
+    const minTime = data.minTime || '16:00';
+    el('subtitle').textContent = `${minTime} 이후 입장권 · Klook 기준`;
     if (data.url) el('cta').href = data.url;
 
     // 상태줄
@@ -187,8 +187,8 @@
     // 안내문
     let notice = '';
     if (stale) notice = `${STALE_MIN}분 넘게 갱신이 없어요. 감시하는 PC가 꺼졌거나 프로그램이 멈췄을 수 있습니다. 아래 목록은 마지막으로 확인한 내용이에요.`;
-    else if (data.state === 'blocked') notice = 'Webket이 접속을 잠시 막았어요. 감시 프로그램이 30분 뒤 다시 시도합니다.';
-    else if (data.state === 'captcha') notice = 'Webket이 사람 확인(CAPTCHA)을 요청해서 감시가 잠시 멈췄어요. 감시하는 사람이 풀면 바로 이어집니다.';
+    else if (data.state === 'blocked') notice = 'Klook이 접속을 잠시 막았어요. 감시 프로그램이 15분 뒤 다시 시도합니다.';
+    else if (data.state === 'captcha') notice = 'Klook이 사람 확인(CAPTCHA)을 요청했어요. 감시 프로그램이 15분 뒤 다시 시도합니다.';
     else if (data.state === 'error') notice = `지금 상태를 확인하지 못했어요. ${data.message || ''}`;
     el('notice').innerHTML = notice ? `<div class="notice">${esc(notice)}</div>` : '';
 
