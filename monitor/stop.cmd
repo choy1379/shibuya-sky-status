@@ -1,3 +1,3 @@
 @echo off
 cd /d "%~dp0"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Test-Path monitor.pid) { $id = Get-Content monitor.pid; Stop-Process -Id $id -ErrorAction SilentlyContinue; Remove-Item monitor.pid; 'stopped PID ' + $id } else { 'not running (no monitor.pid)' }"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ps = Get-CimInstance Win32_Process -Filter \"Name='powershell.exe'\" | Where-Object { $_.CommandLine -match 'monitor\.ps1' }; foreach ($p in $ps) { Stop-Process -Id $p.ProcessId -ErrorAction SilentlyContinue; 'stopped PID ' + $p.ProcessId }; if (-not $ps) { 'not running' }; Remove-Item monitor.pid -ErrorAction SilentlyContinue"
