@@ -2,7 +2,7 @@
 # Read-only: polls Klook's public schedule API, never logs in, books or pays.
 param(
     [string[]]$Dates = @('2026-10-09', '2026-10-10', '2026-10-11'),
-    [string]$MinTime = '18:00',
+    [string]$MinTime = '16:00',
     [string]$Topic = 'shibuya-sky-xfym6e25t7',
     [int]$MinDelay = 120,
     [int]$MaxDelay = 180,
