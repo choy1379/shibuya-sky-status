@@ -59,7 +59,7 @@ function Write-Status($state, $slots) {
         checkedAt      = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
         state          = $state
         minTime        = $MinTime
-        slots          = @($slots)
+        slots          = @($slots | Where-Object { $_ })
         highlightDates = $Dates
         url            = $PageUrl
     }
